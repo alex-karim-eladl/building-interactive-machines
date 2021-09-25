@@ -1,0 +1,3 @@
+The switch_poses.py node defines a node called pose_switcher. It includes 3 combinations of poses for joints 1-4 of the shutter bot: {'joint_1': 0, 'joint_2': 0, 'joint_3': 0, 'joint_4': 0}, {'joint_1': 0, 'joint_2': -0.95, 'joint_3': 0.41, 'joint_4': -1.0}, {'joint_1': 0, 'joint_2': -1.45, 'joint_3': 1.45, 'joint_4': -1.53}.
+
+ Every 5 seconds it cycles through this list and pose_switcher publishes the new poses as Float64 messages to topics: joint_1/command, joint_2/command, joint_3/command, joint_4/command. Pose_switcher is not subscribed to any topic as feedback is not necessary to just cycle through a list.

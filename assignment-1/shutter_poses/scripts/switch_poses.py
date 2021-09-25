@@ -2,7 +2,6 @@
 
 import rospy
 from std_msgs.msg import Float64
-from sensor_msgs.msg import JointState
 # add any other python modules that you need here ...
 
 # define joint positions per pose
@@ -11,8 +10,6 @@ poses_list = [
    {'joint_1': 0, 'joint_2': -0.95, 'joint_3': 0.41, 'joint_4': -1.0},
    {'joint_1': 0, 'joint_2': -1.45, 'joint_3': 1.45, 'joint_4': -1.53}
 ]
-
-# poses_list = [[0,0,0,0], [0,-0.95,0.41,-1], [0,-1.45,1.45,-1.53]]
 
 def pose_switcher():
    # Define publishers and init your node here.
@@ -23,7 +20,7 @@ def pose_switcher():
    pub3 = rospy.Publisher('joint_3/command', Float64, queue_size=10)
    pub4 = rospy.Publisher('joint_4/command', Float64, queue_size=10)
 
-   rospy.init_node('pose_controller', anonymous=True)
+   rospy.init_node('pose_switcher', anonymous=True)
 
    rate = rospy.Rate(0.2) # 10hz
    i = 0
