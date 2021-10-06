@@ -52,6 +52,12 @@ def draw_image(x, y, z, K, width, height, **kwargs):
     # color image
     image[:,:] = (255,255,255) # (B, G, R)
 
+    # print(x, y, z)
+
+    if (z <= 0):
+        rospy.logwarn("Warning: Target is behind the camera (z={})".format(z))
+        return image
+    # rospy.logwarn("(z={})".format(z))
     x_pos, y_pos = project_3D_point(x,y,z,K)
 
     # Example code
@@ -121,6 +127,7 @@ class VirtualCameraNode:
         Target callback
         :param target_msg: target message
         """
+        # print(target_msg.pose.pose.position.x, target_msg.pose.pose.position.y, target_msg.pose.pose.position.z)
 
         # Convert target message to "camera_color_optical_frame" frame to get the target's x,y,z coordinates
         # relative to the camera...
@@ -130,7 +137,7 @@ class VirtualCameraNode:
         rate = rospy.Rate(1000)
         while not rospy.is_shutdown():
             try:
-                trans = tfBuffer.lookup_transform('target', 'camera_color_optical_frame', rospy.Time())
+                trans = tfBuffer.lookup_transform('base_link', 'camera_color_optical_frame', rospy.Time(0))
                 break
             except (tf2_ros.LookupException, tf2_ros.ConnectivityException, tf2_ros.ExtrapolationException):
                 rate.sleep()
@@ -153,7 +160,7 @@ class VirtualCameraNode:
         image_msg.header.stamp = rospy.Time.now()
 
         image_pub = rospy.Publisher('/virtual_camera/image_raw', Image, queue_size=10)
-        camerainfo_pub = rospy.Publisher("/virtual_camera/camera_info", CameraInfo, queue_size=10)
+        camerainfo_pub = rospy.Publisher('/virtual_camera/camera_info', CameraInfo, queue_size=10)
 
         image_pub.publish(image_msg)
 
