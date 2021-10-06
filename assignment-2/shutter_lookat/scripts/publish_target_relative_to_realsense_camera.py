@@ -9,11 +9,26 @@ from geometry_msgs.msg import PoseStamped
 from shutter_lookat.msg import Target
 
 class Node():
-    def __init__(self, trans): # listen for change in pose 
+    def __init__(self): # listen for change in pose 
         rospy.Subscriber('/target', Target, self.callback)
         rospy.spin()
 
+    def get_transform(self, pose):
+        tfBuffer = tf2_ros.Buffer()
+        listener = tf2_ros.TransformListener(tfBuffer)
+
+        rate = rospy.Rate(1000)
+        while not rospy.is_shutdown():
+            try:
+                trans = tfBuffer.lookup_transform('base_footprint', 'camera_color_optical_frame', rospy.Time(0))
+                return trans
+            except (tf2_ros.LookupException, tf2_ros.ConnectivityException, tf2_ros.ExtrapolationException):
+                rate.sleep()
+                continue
+
+
     def callback(self, data):        
+        trans = self.get_transform(data.pose)
         # transfrom pose from base -> cam_color_opt
         pose_trans = tf2_geometry_msgs.do_transform_pose(data.pose, trans)
 
@@ -43,20 +58,8 @@ class Node():
 if __name__ == '__main__':
     rospy.init_node('publish_target_relative_to_realsense_samera', anonymous=True)
 
-    tfBuffer = tf2_ros.Buffer()
-    listener = tf2_ros.TransformListener(tfBuffer)
-
-    rate = rospy.Rate(100)
-    while not rospy.is_shutdown():
-        try:
-            trans = tfBuffer.lookup_transform('base_footprint', 'camera_color_optical_frame', rospy.Time())
-            break
-        except (tf2_ros.LookupException, tf2_ros.ConnectivityException, tf2_ros.ExtrapolationException):
-            rate.sleep()
-            continue
-
     try:
-        n = Node(trans)
+        n = Node()
     except rospy.ROSInterruptException: 
         pass      
 
