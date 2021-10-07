@@ -178,7 +178,11 @@ class FancyVirtualCameraNode:
         rate = rospy.Rate(1000)
         while not rospy.is_shutdown():
             try:
+<<<<<<< HEAD
                 trans = self.tfBuffer.lookup_transform('base_footprint', 'camera_color_optical_frame', pose.header.stamp, rospy.Duration(0.2))
+=======
+                trans = self.tfBuffer.lookup_transform('base_footprint', 'camera_color_optical_frame', pose.header.stamp, rospy.Duration(0.1))
+>>>>>>> 1c905ad5959faf7234368ca1891f993520f66e1c
                 return trans
             except (tf2_ros.ConnectivityException):
                 rate.sleep()

@@ -131,7 +131,11 @@ class VirtualCameraNode:
         rate = rospy.Rate(1000)
         while not rospy.is_shutdown():
             try:
+<<<<<<< HEAD
                 trans = self.tfBuffer.lookup_transform('camera_color_optical_frame', 'base_footprint', pose.header.stamp, rospy.Duration(0.5))
+=======
+                trans = self.tfBuffer.lookup_transform('base_footprint', 'camera_color_optical_frame', pose.header.stamp, rospy.Duration(0.1))
+>>>>>>> 1c905ad5959faf7234368ca1891f993520f66e1c
                 return trans
             except (tf2_ros.ConnectivityException):
                 rate.sleep()
@@ -143,11 +147,16 @@ class VirtualCameraNode:
         Target callback
         :param target_msg: target message
         """
+<<<<<<< HEAD
         self.count += 1
+=======
+
+>>>>>>> 1c905ad5959faf7234368ca1891f993520f66e1c
         # Convert target message to "camera_color_optical_frame" frame to get the target's x,y,z coordinates
         # relative to the camera...
         t = self.get_transform(target_msg.pose)
        
+<<<<<<< HEAD
         pose_trans = tf2_geometry_msgs.do_transform_pose(target_msg.pose, t)
         px = pose_trans.pose.position.x
         py = pose_trans.pose.position.y
@@ -155,6 +164,15 @@ class VirtualCameraNode:
 
         # Draw the camera image. Use the draw_image(x, y, z, K, width, height) function to this end....
         # cv_image = draw_image(t.transform.translation.x,t.transform.translation.y,t.transform.translation.z, self.K, 640, 480)
+=======
+        target_cam_frame = tf2_geometry_msgs.do_transform_pose(target_msg.pose, t)
+        px = - target_msg.pose.pose.position.y + t.transform.translation.y
+        py = - target_msg.pose.pose.position.z + t.transform.translation.z
+        pz = target_msg.pose.pose.position.x - t.transform.translation.x
+        
+    
+        # Draw the camera image. Use the draw_image(x, y, z, K, width, height) function to this end....
+>>>>>>> 1c905ad5959faf7234368ca1891f993520f66e1c
         cv_image = draw_image(px,py,pz, self.K, 640, 480)
         image_width = cv_image.shape[1]
         image_height = cv_image.shape[0]
