@@ -10,25 +10,26 @@ from shutter_lookat.msg import Target
 
 class Node():
     def __init__(self): # listen for change in pose 
+        self.tfbuffer = tf2_ros.Buffer()
+        tf2_ros.TransformListener(self.tfbuffer)
+
         rospy.Subscriber('/target', Target, self.callback)
         rospy.spin()
 
     def get_transform(self, pose):
-        tfBuffer = tf2_ros.Buffer()
-        listener = tf2_ros.TransformListener(tfBuffer)
-
         rate = rospy.Rate(1000)
         while not rospy.is_shutdown():
             try:
-                trans = tfBuffer.lookup_transform('base_footprint', 'camera_color_optical_frame', rospy.Time(0))
+                trans = self.tfbuffer.lookup_transform('base_footprint', 'camera_color_optical_frame', pose.header.stamp, rospy.Duration(0.1))
                 return trans
-            except (tf2_ros.LookupException, tf2_ros.ConnectivityException, tf2_ros.ExtrapolationException):
+            except (tf2_ros.ConnectivityException):
                 rate.sleep()
                 continue
 
 
     def callback(self, data):        
         trans = self.get_transform(data.pose)
+
         # transfrom pose from base -> cam_color_opt
         pose_trans = tf2_geometry_msgs.do_transform_pose(data.pose, trans)
 
@@ -38,6 +39,9 @@ class Node():
         t.header.frame_id = 'camera_color_optical_frame'
         t.child_frame_id = 'target'  
 
+        # t.transform.translation.x = -pose_trans.pose.position.y
+        # t.transform.translation.y = -pose_trans.pose.position.z
+        # t.transform.translation.z = pose_trans.pose.position.x
         t.transform.translation.x = -data.pose.pose.position.y + trans.transform.translation.y
         t.transform.translation.y = -data.pose.pose.position.z + trans.transform.translation.z
         t.transform.translation.z = data.pose.pose.position.x - trans.transform.translation.x
@@ -47,23 +51,15 @@ class Node():
         t.transform.rotation.z = 0
         t.transform.rotation.w = 1
 
-        # print(data.pose)
-        # print(t)
-
         br = tf2_ros.TransformBroadcaster()
         br.sendTransform(t)
 
 
 
 if __name__ == '__main__':
-    rospy.init_node('publish_target_relative_to_realsense_samera', anonymous=True)
+    rospy.init_node('publish_target_relative_to_realsense_camera', anonymous=True)
 
     try:
         n = Node()
     except rospy.ROSInterruptException: 
-        pass      
-
-
-
-
-    
+        pass
