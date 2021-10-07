@@ -1,0 +1,25 @@
+digraph G {
+"base_footprint" -> "base_link"[label=" Broadcaster: /robot_state_publisher\nAverage rate: 10000.0\nBuffer length: 0.0\nMost recent transform: 0.0\nOldest transform: 0.0\n"];
+"camera_depth_frame" -> "camera_color_frame"[label=" Broadcaster: /robot_state_publisher\nAverage rate: 10000.0\nBuffer length: 0.0\nMost recent transform: 0.0\nOldest transform: 0.0\n"];
+"camera_link" -> "camera_depth_frame"[label=" Broadcaster: /robot_state_publisher\nAverage rate: 10000.0\nBuffer length: 0.0\nMost recent transform: 0.0\nOldest transform: 0.0\n"];
+"camera_color_frame" -> "camera_color_optical_frame"[label=" Broadcaster: /robot_state_publisher\nAverage rate: 10000.0\nBuffer length: 0.0\nMost recent transform: 0.0\nOldest transform: 0.0\n"];
+"camera_bottom_screw_frame" -> "camera_link"[label=" Broadcaster: /robot_state_publisher\nAverage rate: 10000.0\nBuffer length: 0.0\nMost recent transform: 0.0\nOldest transform: 0.0\n"];
+"camera_depth_frame" -> "camera_depth_optical_frame"[label=" Broadcaster: /robot_state_publisher\nAverage rate: 10000.0\nBuffer length: 0.0\nMost recent transform: 0.0\nOldest transform: 0.0\n"];
+"head_link" -> "camera_bottom_screw_frame"[label=" Broadcaster: /robot_state_publisher\nAverage rate: 10000.0\nBuffer length: 0.0\nMost recent transform: 0.0\nOldest transform: 0.0\n"];
+"wrist_link" -> "head_link"[label=" Broadcaster: /robot_state_publisher\nAverage rate: 10000.0\nBuffer length: 0.0\nMost recent transform: 0.0\nOldest transform: 0.0\n"];
+"camera_depth_frame" -> "camera_left_ir_frame"[label=" Broadcaster: /robot_state_publisher\nAverage rate: 10000.0\nBuffer length: 0.0\nMost recent transform: 0.0\nOldest transform: 0.0\n"];
+"camera_left_ir_frame" -> "camera_left_ir_optical_frame"[label=" Broadcaster: /robot_state_publisher\nAverage rate: 10000.0\nBuffer length: 0.0\nMost recent transform: 0.0\nOldest transform: 0.0\n"];
+"camera_depth_frame" -> "camera_right_ir_frame"[label=" Broadcaster: /robot_state_publisher\nAverage rate: 10000.0\nBuffer length: 0.0\nMost recent transform: 0.0\nOldest transform: 0.0\n"];
+"camera_right_ir_frame" -> "camera_right_ir_optical_frame"[label=" Broadcaster: /robot_state_publisher\nAverage rate: 10000.0\nBuffer length: 0.0\nMost recent transform: 0.0\nOldest transform: 0.0\n"];
+"forearm_link" -> "wrist_link"[label=" Broadcaster: /robot_state_publisher\nAverage rate: 45.758\nBuffer length: 4.983\nMost recent transform: 1633574456.827\nOldest transform: 1633574451.844\n"];
+"head_link" -> "left_eye"[label=" Broadcaster: /robot_state_publisher\nAverage rate: 10000.0\nBuffer length: 0.0\nMost recent transform: 0.0\nOldest transform: 0.0\n"];
+"head_link" -> "right_eye"[label=" Broadcaster: /robot_state_publisher\nAverage rate: 10000.0\nBuffer length: 0.0\nMost recent transform: 0.0\nOldest transform: 0.0\n"];
+"base_link" -> "shoulder_link"[label=" Broadcaster: /robot_state_publisher\nAverage rate: 45.758\nBuffer length: 4.983\nMost recent transform: 1633574456.827\nOldest transform: 1633574451.844\n"];
+"shoulder_link" -> "biceps_link"[label=" Broadcaster: /robot_state_publisher\nAverage rate: 45.758\nBuffer length: 4.983\nMost recent transform: 1633574456.827\nOldest transform: 1633574451.844\n"];
+"biceps_link" -> "forearm_link"[label=" Broadcaster: /robot_state_publisher\nAverage rate: 45.758\nBuffer length: 4.983\nMost recent transform: 1633574456.827\nOldest transform: 1633574451.844\n"];
+"camera_color_optical_frame" -> "target"[label=" Broadcaster: /publish_target_relative_to_realsense_camera_90512_1633574396198\nAverage rate: 30.201\nBuffer length: 4.967\nMost recent transform: 1633574456.774\nOldest transform: 1633574451.808\n"];
+edge [style=invis];
+ subgraph cluster_legend { style=bold; color=black; label ="view_frames Result";
+"Recorded at time: 1633574456.8638346"[ shape=plaintext ] ;
+}->"base_footprint";
+}

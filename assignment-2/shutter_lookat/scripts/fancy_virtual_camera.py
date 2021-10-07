@@ -10,6 +10,48 @@ from sensor_msgs.msg import Image, CameraInfo
 import geometry_msgs
 from geometry_msgs.msg import PoseStamped
 
+def compute_q(pt, radius):
+    """
+    Compute q - a vector perpindicular to the target
+    direction and the horizontal axis of the camera
+    coordinate frame.
+    pt: the point at the center of the sphere in the
+        camera coordinate frame
+    radius: the radius of the ball 
+    """
+    # replace the line that defines q below with your implementation for this function
+    # but make sure to return a numpy array as the example q below
+    t = np.array([pt[0],pt[1],pt[2]])
+    x_hat = np.array([1.,0.,0.])
+    q = np.cross(t, x_hat)
+    q_hat = q / np.linalg.norm(q)
+    q_scaled = q_hat * radius
+    return q_scaled
+
+def compute_rotation_axis(pt):
+    """
+    Compute normalized rotation axis in same direction
+    as vector t from question IV-1.
+    pt: the point at the center of the sphere in the
+        camera coordinate frame
+    """
+    # replace the line below with your implementation for this function
+
+    rotation_axis = pt / np.linalg.norm(pt)
+    return rotation_axis
+
+def rotate_q(q, rotation_axis, angle):
+    """
+    Rotate q around rotation_axis by the number of 
+    radians specified by angle.
+    q: perpindicular vector from IV-1 and IV-2
+    rotation_axis: normalized rotation axis from IV-3
+    angle: angle of rotation in radians
+    """
+    # replace the line below with your implementation for this function
+    rotated_q = np.cos(angle) * q + np.sin(angle) * np.cross(rotation_axis, q) + (1-np.cos(angle)) * np.dot(rotation_axis,q) * rotation_axis
+    return rotated_q
+    
 
 def project_3D_point(x, y, z, K):
     """
@@ -53,22 +95,28 @@ def draw_image(x, y, z, K, width, height, **kwargs):
     # color image
     image[:,:] = (255,255,255) # (B, G, R)
 
-    # print(x,y,z)
-    # print(x, y, z)
-
+    
     if (z <= 0):
         rospy.logwarn("Warning: Target is behind the camera (z={})".format(z))
         return image
-    # rospy.logwarn("(z={})".format(z))
-    x_pos, y_pos = project_3D_point(x,y,z,K)
-
-    cv2.circle(image, (x_pos,y_pos), 12, (0,0,255), 3) 
+    
+    pixel_array = np.zeros((20,2), dtype=np.int32) # N is the number of points on the contour
+    # x_pos, y_pos = project_3D_point(x,y,z,K)
+    t = np.array([x, y, z])
+    q = compute_q(t, kwargs['radius'])
+    rot = compute_rotation_axis(t)
+    for a in range(20):
+        point = t + rotate_q(q, rot, a*2*np.pi/20)
+        x_pos, y_pos = project_3D_point(point[0],point[1],point[2],K)
+        pixel_array[a,0] = x_pos
+        pixel_array[a,1] = y_pos
+    cv2.drawContours(image, [pixel_array], 0, (255,0,0), 3)
     
     # change this pass for an appropriate return statement, e.g., return image (where image is a numpy array)
     return image
 
 
-class VirtualCameraNode:
+class FancyVirtualCameraNode:
     """
     Node for Part III for the assignment 1. Renders an image from a virtual camera.
     """
@@ -77,9 +125,9 @@ class VirtualCameraNode:
         """
         Constructor
         """
-        self.count = 0
+
         # Init the node
-        rospy.init_node('virtual_camera')
+        rospy.init_node('fancy_virtual_camera')
 
         self.tfBuffer = tf2_ros.Buffer()
         tf2_ros.TransformListener(self.tfBuffer)
@@ -126,36 +174,36 @@ class VirtualCameraNode:
         camera_info_msg.distortion_model = "plumb_bob"
         return camera_info_msg
 
-
     def get_transform(self, pose):
         rate = rospy.Rate(1000)
         while not rospy.is_shutdown():
             try:
-                trans = self.tfBuffer.lookup_transform('camera_color_optical_frame', 'base_footprint', pose.header.stamp, rospy.Duration(0.5))
+                trans = self.tfBuffer.lookup_transform('base_footprint', 'camera_color_optical_frame', pose.header.stamp, rospy.Duration(0.2))
                 return trans
             except (tf2_ros.ConnectivityException):
                 rate.sleep()
                 continue
-
 
     def target_callback(self, target_msg):
         """
         Target callback
         :param target_msg: target message
         """
-        self.count += 1
+        # print(target_msg.pose.pose.position.x, target_msg.pose.pose.position.y, target_msg.pose.pose.position.z)
+
         # Convert target message to "camera_color_optical_frame" frame to get the target's x,y,z coordinates
         # relative to the camera...
+       
         t = self.get_transform(target_msg.pose)
        
-        pose_trans = tf2_geometry_msgs.do_transform_pose(target_msg.pose, t)
-        px = pose_trans.pose.position.x
-        py = pose_trans.pose.position.y
-        pz = pose_trans.pose.position.z
-
+        target_cam_frame = tf2_geometry_msgs.do_transform_pose(target_msg.pose, t)
+        px = - target_msg.pose.pose.position.y + t.transform.translation.y
+        py = - target_msg.pose.pose.position.z + t.transform.translation.z
+        pz = target_msg.pose.pose.position.x - t.transform.translation.x 
+        
+      
         # Draw the camera image. Use the draw_image(x, y, z, K, width, height) function to this end....
-        # cv_image = draw_image(t.transform.translation.x,t.transform.translation.y,t.transform.translation.z, self.K, 640, 480)
-        cv_image = draw_image(px,py,pz, self.K, 640, 480)
+        cv_image = draw_image(px,py,pz, self.K, 640, 480,radius=target_msg.radius)
         image_width = cv_image.shape[1]
         image_height = cv_image.shape[0]
     
@@ -183,6 +231,6 @@ class VirtualCameraNode:
 
 if __name__ == '__main__':
     try:
-        node = VirtualCameraNode()
+        node = FancyVirtualCameraNode()
     except rospy.ROSInterruptException:
         pass
