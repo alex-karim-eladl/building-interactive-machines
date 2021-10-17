@@ -16,9 +16,16 @@ def filter_image(cv_image, lower_hue_value, higher_hue_value):
     :param higher_hue_value: max hue value
     :return: filtered image
     """
+    hsv = cv2.cvtColor(cv_image, cv2.COLOR_BGR2HSV)
+    lower = np.array([lower_hue_value,150,75])
+    higher = np.array([higher_hue_value,255,255])
+    
+    mask = cv2.inRange(hsv, lower, higher)
+    # cv_image = cv2.bitwise_and(cv_image, cv_image, mask=mask)
+
 
     # TODO. Remove the "return cv_image" line below and complete this function as indicated in the assignment's README.md file.
-    return cv_image
+    return mask
 
 
 def compute_keypoints_for_blobs(filtered_image):
@@ -28,8 +35,26 @@ def compute_keypoints_for_blobs(filtered_image):
     :return: list of cv2.Keypoint object (see https://docs.opencv.org/2.4/modules/features2d/doc/common_interfaces_of_feature_detectors.html?highlight=keypoint)
     """
 
-    # TODO. Remove the "return []" line below and complete this function as indicated in the assignment's README.md file
-    return []
+    params = cv2.SimpleBlobDetector_Params()
+
+    params.filterByArea = True
+    params.filterByColor = False
+    params.filterByCircularity = False
+    params.filterByConvexity = False
+    params.filterByInertia = False
+
+    params.minArea = 100
+    params.maxArea = 10000
+    params.minDistBetweenBlobs = 100
+
+    ver = (cv2.__version__).split('.')
+    if int(ver[0]) < 3:
+        detector = cv2.SimpleBlobDetector(params)
+    else:
+        detector = cv2.SimpleBlobDetector_create(params)
+
+    keypoints = detector.detect(filtered_image)
+    return keypoints
 
 
 class DetectTarget():
@@ -123,7 +148,12 @@ class DetectTarget():
         :param position_tuple: (x,y) location for the target in the image
         :param header: header for the observation message
         """
-        # TODO. Complete this function as indicated in the assignment's README.md file
+        msg = Observation()
+        msg.header = header
+        msg.x = position_tuple[0]
+        msg.y = position_tuple[1]
+
+        self.obs_pub.publish(msg)
 
 
 if __name__ == '__main__':
