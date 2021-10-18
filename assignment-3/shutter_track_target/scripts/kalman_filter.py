@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 
 import copy
+from mmap import PROT_EXEC
 import queue
 import cv2
 import numpy as np
+from numpy.testing._private.utils import assert_approx_equal
 import rospy
 from shutter_track_target.msg import Observation
 from cv_bridge import CvBridge, CvBridgeError
@@ -21,6 +23,12 @@ def KF_predict_step(mu, Sigma, A, R):
     :param R: covariance for the noise of the transition model
     :return: predicted mean and covariance for the state based on the transition model A and the process noise R.
     """
+    predicted_mu = A @ mu
+    # print(.shape)
+    # print(x.shape)
+
+    predicted_Sigma = A @ Sigma @ A.T + R
+
     # TODO. Complete. Set the predicted_mu and predicted_Sigma variables according to the Kalman Filter's prediction step.
     return predicted_mu, predicted_Sigma
 
@@ -35,6 +43,10 @@ def KF_measurement_update_step(pred_mu, pred_Sigma, z, C, Q):
     :param Q: covariance for the noise of the observation or measurement model.
     :return: corrected mean and covariance for the state based on the observation z, the linear model C, and the measurement cov. Q.
     """
+    K = pred_Sigma @ C.T @ np.linalg.inv(C @ pred_Sigma @ C.T + Q)
+    corrected_mu = pred_mu + K @ (z - C @ pred_mu)
+    corrected_Sigma = (np.identity(6) - K @ C) @ pred_Sigma
+
     # TODO. Complete. Set the corrected_mu and corrected_Sigma variables according to the Kalman Filter's measurement update step.
     return corrected_mu, corrected_Sigma
 
@@ -219,32 +231,44 @@ class KalmanFilterNode(object):
         Method that assembles the A matrix for the KF_predict_step
         :param delta_t: elapsed time (in seconds) since last prediction
         """
+        self.A =  np.array([[1,0,delta_t,0,0.5*delta_t*delta_t,0],
+                            [0,1,0,delta_t,0,0.5*delta_t*delta_t],
+                            [0,0,1,0,delta_t,0],
+                            [0,0,0,1,0,delta_t],
+                            [0,0,0,0,1,0],
+                            [0,0,0,0,0,1]])
+
         # TODO. Remove the "pass" line below and set self.A based on the elapsed time delta_t
-        pass
+        # pass
 
 
     def assemble_C_matrix(self):
         """
         Method that assembles the C matrix for the KF_measurement_step
         """
+        self.C =  np.array([[1,0,0,0,0,0],
+                            [0,1,0,0,0,0]])
+
         # TODO. Remove the "pass" line below and set self.C such that self.C x self.mu returns the expected measurement
-        pass
+        # pass
 
 
     def initialize_process_covariance(self):
         """
         Method that sets the process covariance R for the filter node
         """
+        self.R = np.identity(6)
         # TODO. Remove the "pass" line below and set self.R
-        pass
+        # pass
 
 
     def initialize_measurement_covariance(self):
         """
         Method that sets the process covariance Q for the filter node
         """
+        self.Q = np.identity(2)
         # TODO. Remove the "pass" line below and set self.Q
-        pass
+        # pass
 
 
     def initialize_mu_and_sigma(self, obs_msg):
@@ -252,8 +276,23 @@ class KalmanFilterNode(object):
         Method that initializes the state (sets self.mu and self.Sigma).
         :param obs_msg Observation message with the latest measured position for the target
         """
+        x = np.array([[obs_msg.x],[obs_msg.y],[0],[0],[0],[0]]) 
+        self.mu = x
+        self.Sigma = np.identity(6)#self.Q + self.R #self.A @ np.array([[obs_msg.x],[obs_msg.y]])
         # TODO. Remove the "pass" line below and set self.mu and self.Sigma to their initial values here.
-        pass
+        # pass
+
+
+    # def assemble_state_vector(self, obs_msg):
+    #     d_t = obs_msg.header.stamp - self.latest_observation_msg.header.stamp
+    #     p_x = obs_msg.x
+    #     p_y = obs_msg.y
+    #     v_x = (p_x - self.latest_observation_msg.x) / d_t
+    #     v_y = (p_y - self.latest_observation_msg.y) / d_t
+    #     a_x = ()
+    #     a_y =
+    #     x = np.array([obs_msg.x,obs_msg.y, ]).reshape(6,1)
+    #     return x
 
 
     def assemble_observation_vector(self, obs_msg):
@@ -262,6 +301,8 @@ class KalmanFilterNode(object):
         :param obs_msg: latest Observation message that has been received by the node
         :return: numpy array representing the observation vector
         """
+        z = np.array([[obs_msg.x],[obs_msg.y]]) #+ np.random.normal(0, self.Q, (2,1))
+
         # TODO. Complete. Build the numpy array z such that it corresponds to the observed target location.
         return z
 

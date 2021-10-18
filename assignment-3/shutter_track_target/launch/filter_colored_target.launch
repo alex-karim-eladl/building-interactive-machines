@@ -23,6 +23,8 @@
         <param name="higher_hue_value" value="$(arg higher_hue_value)"/>
     </node>
 
+    <node pkg="shutter_track_target" type="kalman_filter.py" name="kalman_filter" output="screen"/>
+    
     <!-- track the detected target with the kalman_filter.py script -->
     <!-- COMPLETE! -->
 
