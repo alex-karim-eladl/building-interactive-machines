@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # Script to train and test a neural network with TF's Keras API for face detection
 
 import os
@@ -22,8 +22,8 @@ def load_data_from_npz_file(file_path):
 def normalize_data_per_row(data):
     """
     Normalize a give matrix of data (samples must be organized per row)
-    :param data: input data
-    :return: normalized data with pixel values in [0,1]
+    :param data: input data as a numpy array with dimensions NxHxWxC
+    :return: normalized data with pixel values in [0,1] (array with same dimensions as input)
     """
 
     # sanity checks!

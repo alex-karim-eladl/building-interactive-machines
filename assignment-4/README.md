@@ -1,17 +1,15 @@
-# Assignment 5
+# Assignment 4
 
-This is the fifth assignment for Yale's CPSC-459/559 Building Interactive Machines course.
+This is the fourth assignment for Yale's CPSC-459/559 Building Interactive Machines course.
 
 ## Table of Contents
 
 * [Introduction](#introduction)
     * [System Requirements](#system-requirements)
     * [Background Knowledge](#background-knowledge)
-    * [Notation](#notation)
     * [Preliminaries](#preliminaries)
        * [Training on Google Colaboratory](#training-on-google-colaboratory)
        * [Training on Google Cloud](#training-on-google-cloud)
-       * [Training on Amazon Web Services (AWS)](#training-on-amazon-web-services-aws)
     * [Deliverables](#deliverables)
     * [Evaluation](#evaluation)
     * [Further Reading](#further-reading)
@@ -77,7 +75,7 @@ A `quick tutorial` on using Google Cloud for this assignment is provided in the
 - **Report:** You are expected to submit a pdf to Gradescope with answers to the questions/tasks at 
 the end of each part of the assignment. This report should also have any information needed 
 to understand and/or run your code, as well as the specific commit SHA of the version of the code
-that you would like to be evaluated on. The report is a fillable PDF which is available [here](https://drive.google.com/file/d/11PYDt7UH5h8FWI3rrE9dzpAqHQvdRReY/view?usp=sharing).
+that you would like to be evaluated on. The report is a fillable PDF which is available [here](https://drive.google.com/file/d/1_m4jR6kk_3N12KpS5tZP9xPHOGTMWMKk/view?usp=sharing).
 
 - **Model weights and input normalization parameters:** You should upload trained models and parameters
 to Google Drive and share them with anybody who has access to the links.
@@ -90,12 +88,12 @@ to Google Drive and share them with anybody who has access to the links.
 You assignment will be evaluated based on the content of your report and your code.
 
 - Report (39 pts)
-    * Part I (24 pts): I-1 (4 pts) + I-3 (10 pts) + I-4 (5 pts) + I-5 (5 pts)
-    * Part II (8 pts): II-2 (8 pts)
+    * Part I (29 pts): I-1 (7 pts) + I-3 (10 pts) + I-4 (6 pts) + I-5 (6 pts)
+    * Part II (10 pts): II-2 (10 pts)
 - Code (61 pts)
     * Part I (11 pts): I-1 (2 pts) + I-2 (6 pts) + I-3 (3 pts)
     * Part II (29 pts): II-1 (17 pts) + II-2 (12 pts) 
-    * Part III (28 pts): III-1 (28 pts)
+    * Part III (28 pts): III-1 (14 pts) + III-2 (14 pts)
 
 **Note on Part III of the assignment:** Part III provides extra credit for those at the top of the leaderboard in Gradescope.
 The extra credit (2 pts) is valid for all students (CPSC 459 or 559) and will be counted for the final course grade 
@@ -170,7 +168,7 @@ by running the following commands on a Python shell:
 ```
 
 The function should return True if TensorFlow can access your GPU. If the function
-returns False, check the errors that are printed in the Shell. Common errors include
+returns False, check the errors that are printed in the shell. Common errors include
 not having Cuda 11.2 installed in the system but a different version, not having CuDNN
 installed for Cuda 11.2, and not having CUDA system variables setup in your environment. 
 See the [TensorFlow GPU support page](https://www.tensorflow.org/install/gpu) 
@@ -184,11 +182,11 @@ by Brian Yung Rowe.
 
 Once you've read the primer, you should complete the tasks below to approximate the 
 [monkey saddle surface](https://en.wikipedia.org/wiki/Monkey_saddle) defined by the equation ![equation](https://latex.codecogs.com/gif.latex?z&space;=&space;x^3&space;-&space;3xy^2).
-<!-- $`z = x^3 - 3xy^2`$ --> Your code should leverage [TensorFlow's
-Keras API](https://www.tensorflow.org/guide/keras).
+<!-- $`z = x^3 - 3xy^2`$ --> 
+Your code should leverage [TensorFlow's Keras API](https://www.tensorflow.org/guide/keras).
 
 To get you started, this assignment provides two files within the 
-`assignment-5/function_approximation` directory:
+`assignment-4/function_approximation` directory:
 
 - *train_and_test_saddle_function.py:* main file that you will complete in this part of the assignment.
 - *saddle_function_utils:* code to generate data and help you visualize results.
@@ -199,7 +197,7 @@ script generates for you and example predictions with a linear neural network mo
 [TensorFlow's Keras API](https://www.tensorflow.org/versions/r2.0/api_docs/python/tf/keras):
 
 ```bash
-$ cd assignment-5/function_approximation
+$ cd assignment-4/function_approximation
 $ ./train_and_test_saddle_function.py --visualize_training_data
 ```
 
@@ -239,7 +237,8 @@ optional arguments:
 The optional parameters `lr`, `epochs`, and `batch_size` correspond to the learning rate,
 number of epochs, and bath size that are used at training time.
 
-Read the code in the training script to familiarize yourself with its functionality.
+Read the code in the training script to familiarize yourself with its functionality. We highly recommend that you also 
+watch [Nathan's video](https://yale.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=80140234-566a-417d-b4ad-adc201246740), where he walks you through the code in a Google Colab notebook, so that you understand how to work with Keras within the training script.
 
 ### Questions/Tasks
 
@@ -339,16 +338,19 @@ and train its weights further (e.g., to resume training or for fine-tuning on a 
     ```
     
     The model that you trained before for task I-1 should be stored as best_monkey_weights.h5
-    within the folder corresponding to your training session in assignments-5/function_approximation/logs.
+    within the folder corresponding to your training session in assignments-4/function_approximation/logs.
     You can pass this model as argument to your train_and_test_saddle_function.py to test the new
     functionality that you just implemented.
     
 - **I-3.** Complete the function called `build_nonlinear_model()` in the train_and_test_saddle_function.py 
 script. This function should have as argument the number of input features for the data and should
 return a [Keras model](https://www.tensorflow.org/api_docs/python/tf/keras/models/Model), similar
-to the build_linear_model() function that you implemented before. The difference between these functions, though, 
+to the `build_linear_model()` function that you implemented before. The difference between these functions, though, 
 is that build_nonlinear_model() should implement a more complex neural network capable of approximating the monkey saddle surface
-with an **average L2 error of 150 or less on the test set**.
+with an **average L2 error of 150 or less on the test set**. Note that this error is printed by the `train_and_test_saddle_function.py`
+script when it finishes running.
+
+   The `build_nonlinear_model()` function looks as follows in the `train_and_test_saddle_function.py` script:
 
     ```python
     def build_nonlinear_model(num_inputs):
@@ -405,21 +407,17 @@ classifier.
 
 1. Download a subset of the [Face Detection Dataset and Benchmark](http://vis-www.cs.umass.edu/fddb/) 
 from [this link](https://drive.google.com/open?id=1JIIalRu5WZQ01p-S6mBxzHV8ZMqAJcdH) and place it in 
-the assignment-5/face_detection directory (note that you should not commit the data to your repository).
+the `assignment-4/face_detection` directory (note that you should not commit the data to your repository).
 
    > The data is provided as a [numpy npz file](https://docs.scipy.org/doc/numpy-1.15.1/reference/generated/numpy.savez.html) for this assignment. 
    The .npz file format is a zipped archive of files named after the variables they contain. 
-   The archive is not compressed and each file in the archive contains one variable in .npy format. 
-   For a description of the .npy format, see [numpy.lib.format](https://docs.scipy.org/doc/numpy-1.15.1/reference/generated/numpy.lib.format.html#module-numpy.lib.format).
+   For a description of the .npy format, see [numpy.lib.format](https://numpy.org/doc/stable/reference/generated/numpy.lib.format.html#module-numpy.lib.format).
 
    Check that you can open the data in python and that it has inputs and target values:
    
    ```bash
-   $ cd assignment-5/face_detection/ # go to the assignment-5/face_detection directory within your private repository
-   $ python 
-   Python 2.7.15rc1 (default, Apr 15 2018, 21:51:34) 
-   [GCC 7.3.0] on linux2
-   Type "help", "copyright", "credits" or "license" for more information.
+   $ cd assignment-4/face_detection/ # go to the assignment-4/face_detection directory within your private repository
+   $ python3 
    >>> import numpy as np
    >>> data = np.load("64x64_data.npz")
    >>> data.files
@@ -436,7 +434,7 @@ the assignment-5/face_detection directory (note that you should not commit the d
    
    <img src="docs/face_example.png" alt="Face example from the dataset"/>
    
-2. Read the `train_face_detection.py` skeleton code in the assignment-5/face_detection directory. 
+2. Read the `train_face_detection.py` skeleton code in the `assignment-4/face_detection` directory. 
 This code is provided to get you started on building your custom face classifier. You should be able to run the code
 and load the training data with the following command:
 
@@ -458,9 +456,10 @@ train_face_detection.py script so that it:
 
    a. Splits the input data into a training and validation set.
    
-   b. Normalizes the training data such that the pixel values are floats in [0,1] rather than integers in [0,255].
+   b. Normalizes the training data such that the pixel values are floats in [0,1] rather than integers in [0,255]. The normalization logic
+   should be implemented within the `normalize_data_per_row()` function of the `train_face_detection.py` script.
    
-   c. Builds a convolutional neural network model with the TensorFlow Keras API to predict 
+   c. Builds a convolutional neural network model with TensorFlow's Keras API to predict 
    whether the input image corresponds to the face of a person or not. The output of the
    network should be a probability (i.e., a float between 0 and 1) corresponding to the 
    likelihood that the input image shows a human face.
@@ -507,7 +506,7 @@ train your model using the 64x64_data.npz dataset:
     - **epochs:** number of epochs to train for
     - **batch_size:** batch size used for training<br/><br/>
 
-    Commit your modified train_face_detection.py
+    Commit your modified `train_face_detection.py`
     script to your repository once you are happy with your model. 
     **Upload your best weights.h5 file to Google Drive, share the file publicly with "Anyone with a link",
     and add its URL to the `WEIGHT_FILE_URL` variable at top of the `face_detection/download_weights.py` script.**
@@ -525,14 +524,14 @@ train your model using the 64x64_data.npz dataset:
     as part of this assignment) but that you can assume comes from the same image distribution as
     the data that is provided in the 64x64_data.npz file. The expectation is that your model should
     reach at least **0.9 (or 90%) binary accuracy** on the (unseen) test set. You can read more about
-    binary accuracy in the [official TensorFlow documentation]https://www.tensorflow.org/versions/r2.0/api_docs/python/tf/keras/metrics/BinaryAccuracy).
+    binary accuracy in the [official TensorFlow documentation](https://www.tensorflow.org/versions/r2.6/api_docs/python/tf/keras/metrics/BinaryAccuracy).
     
     In general, we recommend that you use [TensorBoard](https://www.tensorflow.org/guide/summaries_and_tensorboard) 
     to monitor the performance of your model in a validation set as it trains.
     
 - **II-2.** The binary accuracy metric that you used before, assumed that a face was found when the output
 probability of your network was greater than 0.5 for a given input. But, is this the best threshold 
-to decide that your network found a face? You will now inspect how accuracy changes as a 
+to decide that your network found a face? You will now inspect how performance changes as a 
 function of the threshold to better understand if 0.5 is a good value for your classifier.
 
     To start, make a copy of the evaluate_face_detection.py script and name it `plot_roc_curve.py`:
@@ -575,6 +574,7 @@ function of the threshold to better understand if 0.5 is a good value for your c
         :param input_features: input tensor
         :param target: target tensor
         :param model: Keras model
+        :return: list of TPR, list of FPR, list of thresholds, index of best threshold as an int
         """
         ... # normalize the inputs
         
@@ -672,7 +672,7 @@ As the launch script is running, you can check that example `state`-`action` pai
 
 ```
 $ tail -f state_action.txt
-# data from 19/10/2021 23:00:05
+# data from 17/10/2021 23:00:05
 base_footprint  1.1781  -0.1099 1.3627  0.0000  0.0000  -0.1202 -0.6751
 base_footprint  1.9321  -2.6038 0.6671  -0.1202 -0.6751 -0.8220 0.5598
 base_footprint  2.8652  -0.8011 2.2853  -0.9423 -0.1153 0.6589  -0.4528
@@ -724,10 +724,20 @@ be placed within the `assignment-4/shutter_behavior_cloining/scripts` directory.
     `https://drive.google.com/file/d/<file_id>/view?usp=sharing`, then you should add 
     `https://drive.google.com/uc?id=<file_id>` to the script for the evaluation with Gradescope to run successfully.
     
+- **III-2.** Complete the `assignment-4/shutter_behavior_cloining/scripts/run_policy.py` script so that it loads up 
+your model and computes new poses for Shutter to follow the target. More specifically, update lines 26-28 in the script
+to load up your model from disk using the model file path and normalization params provided to the node via:
+    ```python
+    self.model_file = rospy.get_param("~model")              # required path to model file
+    self.normp_file = rospy.get_param("~norm_params", "")    # optional path to normalization parameters (empty str means no norm params)
+    ```
+    Also, update the `compute_joints_position()` function in line 63 to make a prediction for 
+    the robot's joint position such that the `target_callback()` function can command the robot to move appropriately relative to the observed target.
+
     **NOTE 1:** You can test your model with the `test_policy.launch` file within 
     `assignment-4/shutter_behavior_cloning/test`. For example:
     ```bash
-    rostest shutter_behavior_cloning test_policy.launch model:=<path_to_model_hdf5> [normp:=<path_to_normalization_file>] run_rviz:=True
+    rostest shutter_behavior_cloning test_policy.launch model:=<full_path_to_model_hdf5> [normp:=<full_path_to_normalization_file>] run_rviz:=True
     ```
     The test will output the `~/.ros/test_policy_output.txt` file with: trial number, the target's x,y,z coordinates,
     the difference (in radians) between the predicted joint_1 and joint_3 positions and the expert's output, and
