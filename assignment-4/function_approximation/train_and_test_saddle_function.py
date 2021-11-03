@@ -8,7 +8,8 @@ import datetime
 import numpy as np
 import tensorflow as tf
 import saddle_function_utils as sfu
-
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Flatten, Dense, Softmax, Input
 
 def compute_normalization_parameters(data):
     """
@@ -63,15 +64,37 @@ def build_linear_model(num_inputs):
     return model
 
 
+# def build_nonlinear_model(num_inputs):
+#     """
+#     Build NN model with Keras
+#     :param num_inputs: number of input features for the model
+#     :return: Keras model
+#     """
+#     input = tf.keras.layers.Input(shape=(num_inputs,), name="inputs")
+#     hidden1 = tf.keras.layers.Dense(256, activation="relu", use_bias=True)(input)
+#     hidden2 = tf.keras.layers.Dense(256, activation="relu", use_bias=True)(hidden1)
+#     hidden3 = tf.keras.layers.Dense(128, activation="relu", use_bias=True)(hidden2)
+#     hidden4 = tf.keras.layers.Dense(128, activation="relu", use_bias=True)(hidden3)
+#     output = tf.keras.layers.Dense(1, use_bias=True)(hidden4)
+#     model = tf.keras.models.Model(inputs=input, outputs=output, name="monkey_model")
+#     return model
+
+
 def build_nonlinear_model(num_inputs):
     """
     Build NN model with Keras
     :param num_inputs: number of input features for the model
     :return: Keras model
     """
-    # TO-DO: Complete. Remove the None line below, define your model, and return it.
-    return None
-
+    input = tf.keras.layers.Input(shape=(num_inputs,), name="inputs")
+    hidden1 = tf.keras.layers.Dense(1024, activation="relu", use_bias=True)(input)
+    hidden2 = tf.keras.layers.Dense(512, activation="relu", use_bias=True)(hidden1)
+    hidden3 = tf.keras.layers.Dense(1024, activation="relu", use_bias=True)(hidden2)
+    hidden4 = tf.keras.layers.Dense(512, activation="relu", use_bias=True)(hidden3)
+    hidden5 = tf.keras.layers.Dense(1024, activation="relu", use_bias=True)(hidden4)
+    output = tf.keras.layers.Dense(1, use_bias=True)(hidden5)
+    model = tf.keras.models.Model(inputs=input, outputs=output, name="monkey_model")  
+    return model
 
 def train_model(model, train_input, train_target, val_input, val_target, input_mean, input_stdev,
                 epochs=20, learning_rate=0.01, batch_size=16):
@@ -99,11 +122,23 @@ def train_model(model, train_input, train_target, val_input, val_target, input_m
                  metrics=['mae'])
 
     # TODO - Create callbacks for saving checkpoints and visualizing loss on TensorBoard
+     # tensorboard callback
+    logs_dir = 'logs/log_{}'.format(datetime.datetime.now().strftime("%m-%d-%Y-%H-%M"))
+    tbCallBack = tf.keras.callbacks.TensorBoard(log_dir=logs_dir, write_graph=True)
+
+    # save checkpoint callback
+    checkpointCallBack = tf.keras.callbacks.ModelCheckpoint(os.path.join(logs_dir,'best_monkey_weights.h5'),
+                                                            monitor='mae',
+                                                            verbose=0,
+                                                            save_best_only=True,
+                                                            save_weights_only=False,
+                                                            mode='auto',
+                                                            save_freq=1)
 
     # do training for the specified number of epochs and with the given batch size
-    # TODO - Add callbacks to fit funciton
     model.fit(norm_train_input, train_target, epochs=epochs, batch_size=batch_size,
-             validation_data=(norm_val_input, val_target))
+            validation_data=(norm_val_input, val_target),
+            callbacks=[tbCallBack, checkpointCallBack]) # add this extra parameter to the fit function
 
 
 def test_model(model, test_input, input_mean, input_stdev, batch_size=60):
@@ -157,6 +192,7 @@ def main(num_examples, epochs, lr, visualize_training_data, build_fn=build_linea
 
     # split data into training (70%) and testing (30%)
     all_train_input, all_train_target, test_input, test_target = sfu.split_data(input, target, 0.6)
+    # print(all_train_input.shape)
 
     # visualize all training/testing (uncomment if you want to visualize the whole dataset)
     # plot_train_and_test(all_train_input, all_train_target, test_input, test_target, "train", "test", title="Train/Test Data")
@@ -165,11 +201,12 @@ def main(num_examples, epochs, lr, visualize_training_data, build_fn=build_linea
     train_input, train_target, val_input, val_target = sfu.split_data(all_train_input, all_train_target, 0.8)
 
     # visualize training/validation (uncomment if you want to visualize the training/validation data)
-    if visualize_training_data:
-        sfu.plot_train_and_test(train_input, train_target, val_input, val_target, "train", "validation", title="Train/Val Data")
+    # if visualize_training_data:
+    #     sfu.plot_train_and_test(train_input, train_target, val_input, val_target, "train", "validation", title="Train/Val Data")
 
     # normalize input data and save normalization parameters to file
     mean, stdev = compute_normalization_parameters(train_input)
+
 
     # build the model
     model = build_fn(train_input.shape[1])
@@ -190,31 +227,34 @@ def main(num_examples, epochs, lr, visualize_training_data, build_fn=build_linea
     # visualize the result
     sfu.plot_test_predictions(test_input, test_target, predicted_targets, title="Predictions")
 
+    
+
 
 if __name__ == "__main__":
 
     # script arguments
     parser = argparse.ArgumentParser()
-    parser.add_argument("--n", help="total number of examples (including training, testing, and validation)",
-                        type=int, default=600)
-    parser.add_argument("--batch_size", help="batch size used for training",
-                        type=int, default=16)
-    parser.add_argument("--epochs", help="number of epochs for training",
-                        type=int, default=50)
-    parser.add_argument("--lr", help="learning rate for training",
-                        type=float, default=50)
-    parser.add_argument("--visualize_training_data", help="visualize training data",
-                        action="store_true")
-    parser.add_argument("--build_fn", help="model to train (e.g., 'linear')",
-                        type=str, default="linear")
+    parser.add_argument("--n", help="total number of examples (including training, testing, and validation)", type=int, default=600)
+    parser.add_argument("--batch_size", help="batch size used for training", type=int, default=16)
+    parser.add_argument("--epochs", help="number of epochs for training", type=int, default=50)
+    parser.add_argument("--lr", help="learning rate for training", type=float, default=50)
+    parser.add_argument("--visualize_training_data", help="visualize training data", action="store_true")
+    parser.add_argument("--build_fn", help="model to train (e.g., 'linear')", type=str, default="linear")
+    parser.add_argument("--load_model", help="path to the model", type=str, default="")
     args = parser.parse_args()
 
     # define the model function that we will use to assemble the Neural Network
     if args.build_fn == "linear":
         build_fn = build_linear_model # function that builds linear model
+    elif args.build_fn == "nonlinear":
+        build_fn = build_nonlinear_model # function that builds non-linear model
     else:
         print("Invalid build function name {}".format(args.build_fn))
         sys.exit(1)
+
+    # load model (and thus, ignore prior build function)
+    if len(args.load_model) > 0:
+        build_fn = lambda x: tf.keras.models.load_model(args.load_model, compile=False)
 
     # run the main function
     main(args.n, args.epochs, args.lr, args.visualize_training_data, build_fn=build_fn, batch_size=args.batch_size)
