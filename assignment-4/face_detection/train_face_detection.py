@@ -34,14 +34,13 @@ def normalize_data_per_row(data):
 
     return data.astype(float)/255.0
 
-
 def train_model(model, train_input, train_target, val_input, val_target, logs_dir, epochs=20, learning_rate=0.01, batch_size=16):
     # compile the model: define optimizer, loss, and metrics
     model.compile(optimizer=tf.keras.optimizers.Adam(lr=learning_rate), loss='binary_crossentropy', metrics=['binary_accuracy'])
 
     # TODO - Create callbacks for saving checkpoints and visualizing loss on TensorBoard
      # tensorboard callback
-    log_dir = logs_dir + '/log_{}'.format(datetime.datetime.now().strftime("%m-%d-%Y-%H-%M"))
+    log_dir = logs_dir + '/face_log_{}'.format(datetime.datetime.now().strftime("%m-%d-%Y-%H-%M"))
     tbCallBack = tf.keras.callbacks.TensorBoard(log_dir=log_dir, write_graph=True)
 
     # save checkpoint callback
@@ -56,8 +55,7 @@ def train_model(model, train_input, train_target, val_input, val_target, logs_di
     # do training for the specified number of epochs and with the given batch size
     model.fit(train_input, train_target, epochs=epochs, batch_size=batch_size,
             validation_data=(val_input, val_target),
-            callbacks=[tbCallBack, checkpointCallBack]) 
-
+            callbacks=[tbCallBack, checkpointCallBack])
 
 def main(npz_data_file, batch_size, epochs, lr, val, logs_dir):
     """
@@ -77,12 +75,10 @@ def main(npz_data_file, batch_size, epochs, lr, val, logs_dir):
     print("Loaded {} training examples.".format(N))
 
     # TODO. Complete. Implement code to train a network for image classification
-    all_train_input, test_input, all_train_target, test_target = train_test_split(input, target, test_size=.4)
-    train_input, val_input, train_target, val_target = train_test_split(all_train_input, all_train_target, test_size=val)
+    train_input, val_input, train_target, val_target = train_test_split(input, target, test_size=val)
 
     train_input = normalize_data_per_row(train_input)
     val_input = normalize_data_per_row(val_input)
-    test_input = normalize_data_per_row(test_input)
 
     # print(train_input.shape)
 
@@ -93,7 +89,6 @@ def main(npz_data_file, batch_size, epochs, lr, val, logs_dir):
     print("\n\nTRAINING...")
     train_model(model, train_input, train_target, val_input, val_target, logs_dir,
                 epochs=epochs, learning_rate=lr, batch_size=batch_size)
-
 
 def build_cnn_model(train_input):
     alpha = 0.3
@@ -139,9 +134,10 @@ def build_cnn_model(train_input):
     model.add(LeakyReLU(alpha))
     model.add(Conv2D(1000, (1, 1), padding="same"))
     model.add(LeakyReLU(alpha))
-    
-    model.add(AveragePooling2D(pool_size=(4,4)))
-    model.add(Softmax())
+
+    model.add(Flatten())
+    model.add(Dense(1, activation="sigmoid"))
+
 
     return model
 
@@ -149,9 +145,9 @@ def build_cnn_model(train_input):
 if __name__ == "__main__":
     # script arguments
     parser = argparse.ArgumentParser()
-    parser.add_argument("--epochs", help="number of epochs for training", type=int, default=100)
-    parser.add_argument("--batch_size", help="batch size used for training", type=int, default=200)
-    parser.add_argument("--lr", help="learning rate for training", type=float, default=1e-4)
+    parser.add_argument("--epochs", help="number of epochs for training", type=int, default=20)
+    parser.add_argument("--batch_size", help="batch size used for training", type=int, default=100)
+    parser.add_argument("--lr", help="learning rate for training", type=float, default=1e-3)
     parser.add_argument("--val", help="percent of training data to use for validation", type=float, default=0.2)
     parser.add_argument("--input", help="input file (npz format)", type=str, required=True)
     parser.add_argument("--logs_dir", help="logs directory", type=str, default="")

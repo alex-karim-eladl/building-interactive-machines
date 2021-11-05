@@ -64,22 +64,6 @@ def build_linear_model(num_inputs):
     return model
 
 
-# def build_nonlinear_model(num_inputs):
-#     """
-#     Build NN model with Keras
-#     :param num_inputs: number of input features for the model
-#     :return: Keras model
-#     """
-#     input = tf.keras.layers.Input(shape=(num_inputs,), name="inputs")
-#     hidden1 = tf.keras.layers.Dense(256, activation="relu", use_bias=True)(input)
-#     hidden2 = tf.keras.layers.Dense(256, activation="relu", use_bias=True)(hidden1)
-#     hidden3 = tf.keras.layers.Dense(128, activation="relu", use_bias=True)(hidden2)
-#     hidden4 = tf.keras.layers.Dense(128, activation="relu", use_bias=True)(hidden3)
-#     output = tf.keras.layers.Dense(1, use_bias=True)(hidden4)
-#     model = tf.keras.models.Model(inputs=input, outputs=output, name="monkey_model")
-#     return model
-
-
 def build_nonlinear_model(num_inputs):
     """
     Build NN model with Keras
@@ -87,14 +71,32 @@ def build_nonlinear_model(num_inputs):
     :return: Keras model
     """
     input = tf.keras.layers.Input(shape=(num_inputs,), name="inputs")
-    hidden1 = tf.keras.layers.Dense(1024, activation="relu", use_bias=True)(input)
-    hidden2 = tf.keras.layers.Dense(512, activation="relu", use_bias=True)(hidden1)
+    hidden1 = tf.keras.layers.Dense(512, activation="relu", use_bias=True)(input)
+    hidden2 = tf.keras.layers.Dense(1024, activation="relu", use_bias=True)(hidden1)
     hidden3 = tf.keras.layers.Dense(1024, activation="relu", use_bias=True)(hidden2)
-    hidden4 = tf.keras.layers.Dense(512, activation="relu", use_bias=True)(hidden3)
-    hidden5 = tf.keras.layers.Dense(1024, activation="relu", use_bias=True)(hidden4)
+    hidden4 = tf.keras.layers.Dense(1024, activation="relu", use_bias=True)(hidden3)
+    hidden5 = tf.keras.layers.Dense(512, activation="relu", use_bias=True)(hidden4)
+
     output = tf.keras.layers.Dense(1, use_bias=True)(hidden5)
-    model = tf.keras.models.Model(inputs=input, outputs=output, name="monkey_model")  
+    model = tf.keras.models.Model(inputs=input, outputs=output, name="monkey_model")
     return model
+
+
+# def build_nonlinear_model(num_inputs):
+#     """
+#     Build NN model with Keras
+#     :param num_inputs: number of input features for the model
+#     :return: Keras model
+#     """
+#     input = tf.keras.layers.Input(shape=(num_inputs,), name="inputs")
+#     hidden1 = tf.keras.layers.Dense(1024, activation="relu", use_bias=True)(input)
+#     hidden2 = tf.keras.layers.Dense(512, activation="relu", use_bias=True)(hidden1)
+#     hidden3 = tf.keras.layers.Dense(1024, activation="relu", use_bias=True)(hidden2)
+#     hidden4 = tf.keras.layers.Dense(512, activation="relu", use_bias=True)(hidden3)
+#     hidden5 = tf.keras.layers.Dense(1024, activation="relu", use_bias=True)(hidden4)
+#     output = tf.keras.layers.Dense(1, use_bias=True)(hidden5)
+#     model = tf.keras.models.Model(inputs=input, outputs=output, name="monkey_model")  
+#     return model
 
 def train_model(model, train_input, train_target, val_input, val_target, input_mean, input_stdev,
                 epochs=20, learning_rate=0.01, batch_size=16):
@@ -218,14 +220,19 @@ def main(num_examples, epochs, lr, visualize_training_data, build_fn=build_linea
 
     # test the model
     print("\n\nTESTING...")
-    predicted_targets = test_model(model, test_input, mean, stdev)
+    test_predictions = test_model(model, test_input, mean, stdev)
+    train_predictions = test_model(model, train_input, mean, stdev)
+
 
     # Report average L2 error
-    l2_err = compute_average_L2_error(test_target, predicted_targets)
-    print("L2 Error on Testing Set: {}".format(l2_err))
+    test_l2_err = compute_average_L2_error(test_target, test_predictions)
+    train_l2_err = compute_average_L2_error(train_target, train_predictions)
+
+    print("L2 Error on Testing Set: {}".format(test_l2_err))
+    print("L2 Error on Training Set: {}".format(train_l2_err))
 
     # visualize the result
-    sfu.plot_test_predictions(test_input, test_target, predicted_targets, title="Predictions")
+    # sfu.plot_test_predictions(test_input, test_target, test_predictions, title="Predictions")
 
     
 

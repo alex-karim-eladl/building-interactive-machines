@@ -24,7 +24,7 @@ class RunPolicyNode(object):
         self.normp_file = rospy.get_param("~norm_params", "")    # optional path to normalization parameters (empty str means no norm params)
 
         # TODO - complete the line below to load up your model and create any necessary class instance variables
-        self.model = ...
+        self.model = tf.keras.models.load_model('best_imitation_weights')
 
         # joint values
         self.joint1 = None

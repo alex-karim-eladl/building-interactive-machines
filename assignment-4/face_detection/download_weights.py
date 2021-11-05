@@ -7,7 +7,7 @@ import argparse
 import gdown
 
 
-WEIGHT_FILE_URL = None  # TODO - change None for your weights URL
+WEIGHT_FILE_URL = 'https://drive.google.com/uc?id=12UZeabOj84PB88taf6AWAvG8cWDv_BU4'  # TODO - change None for your weights URL
 
 
 def yes_no(question):
