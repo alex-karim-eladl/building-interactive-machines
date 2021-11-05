@@ -15,8 +15,8 @@ import gdown
 #   $ import train_utils
 #   $ train_utils.download_model_files(quiet=False)
 # Then, you should have a copy of your model named my_keras_model in your local disk.
-MODEL_URL = None
-NORM_PARAMS_URL = None
+MODEL_URL = "https://drive.google.com/uc?id=1O1TES8ei8ewt9Anu27G-LWVhNjcgJMEP"
+NORM_PARAMS_URL = "https://drive.google.com/uc?id=1l6Wljaj3W91swnPhDDfVP0N83LZznz19"
 
 
 def load_data(input_file):

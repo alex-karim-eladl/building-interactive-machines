@@ -9,7 +9,7 @@ import numpy as np
 import tensorflow as tf
 import saddle_function_utils as sfu
 from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Flatten, Dense, Softmax, Input
+from tensorflow.keras.layers import Flatten, Dense, LeakyReLU
 
 def compute_normalization_parameters(data):
     """
@@ -64,23 +64,55 @@ def build_linear_model(num_inputs):
     return model
 
 
+# def build_nonlinear_model(num_inputs):
+#     """
+#     Build NN model with Keras
+#     :param num_inputs: number of input features for the model
+#     :return: Keras model
+#     """
+#     input = tf.keras.layers.Input(shape=(num_inputs,), name="inputs")
+#     hidden1 = tf.keras.layers.Dense(512, activation="relu", use_bias=True)(input)
+#     hidden2 = tf.keras.layers.Dense(1024, activation="relu", use_bias=True)(hidden1)
+#     hidden3 = tf.keras.layers.Dense(1024, activation="relu", use_bias=True)(hidden2)
+#     hidden4 = tf.keras.layers.Dense(1024, activation="relu", use_bias=True)(hidden3)
+#     hidden5 = tf.keras.layers.Dense(512, activation="relu", use_bias=True)(hidden4)
+
+#     output = tf.keras.layers.Dense(1, use_bias=True)(hidden5)
+#     model = tf.keras.models.Model(inputs=input, outputs=output, name="monkey_model")
+#     return model
+
 def build_nonlinear_model(num_inputs):
     """
     Build NN model with Keras
     :param num_inputs: number of input features for the model
     :return: Keras model
     """
-    input = tf.keras.layers.Input(shape=(num_inputs,), name="inputs")
-    hidden1 = tf.keras.layers.Dense(512, activation="relu", use_bias=True)(input)
-    hidden2 = tf.keras.layers.Dense(1024, activation="relu", use_bias=True)(hidden1)
-    hidden3 = tf.keras.layers.Dense(1024, activation="relu", use_bias=True)(hidden2)
-    hidden4 = tf.keras.layers.Dense(1024, activation="relu", use_bias=True)(hidden3)
-    hidden5 = tf.keras.layers.Dense(512, activation="relu", use_bias=True)(hidden4)
+    # alpha = 0.3
+    model = Sequential() 
 
-    output = tf.keras.layers.Dense(1, use_bias=True)(hidden5)
-    model = tf.keras.models.Model(inputs=input, outputs=output, name="monkey_model")
+    # model.add(Dense(128, activation="relu"))
+    # model.add(LeakyReLU(alpha))
+    model.add(Dense(64, activation="relu", input_shape=(num_inputs,)))
+    model.add(Dense(128, activation="relu"))
+    model.add(Dense(64, activation="tanh"))
+    model.add(Dense(64, activation="relu"))
+
+    # model.add(LeakyReLU(alpha))
+    model.add(Dense(1))
+
+
+    # input = tf.keras.layers.Input(shape=(num_inputs,), name="inputs")
+    # hidden1 = tf.keras.layers.Dense(512, use_bias=True)(input)
+    # hidden2 = tf.keras.layers.Dense(512, use_bias=True)(hidden1)
+    # hidden3 = tf.keras.layers.Dense(256, use_bias=True)(hidden2)
+    # hidden4 = tf.keras.layers.Dense(256, use_bias=True)(hidden3)
+    # hidden5 = tf.keras.layers.Dense(128, use_bias=True)(hidden4)
+    # hidden6 = tf.keras.layers.Dense(128, use_bias=True)(hidden5)
+    # hidden5 = tf.keras.layers.Dense(128, activation="relu", use_bias=True)(hidden4)
+
+    # output = tf.keras.layers.Dense(1, use_bias=True)(hidden6)
+    # model = tf.keras.models.Model(inputs=input, outputs=output, name="monkey_model")
     return model
-
 
 # def build_nonlinear_model(num_inputs):
 #     """
@@ -246,7 +278,7 @@ if __name__ == "__main__":
     parser.add_argument("--epochs", help="number of epochs for training", type=int, default=50)
     parser.add_argument("--lr", help="learning rate for training", type=float, default=50)
     parser.add_argument("--visualize_training_data", help="visualize training data", action="store_true")
-    parser.add_argument("--build_fn", help="model to train (e.g., 'linear')", type=str, default="linear")
+    parser.add_argument("--build_fn", help="model to train (e.g., 'linear')", type=str, default="nonlinear")
     parser.add_argument("--load_model", help="path to the model", type=str, default="")
     args = parser.parse_args()
 

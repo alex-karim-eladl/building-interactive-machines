@@ -1,10 +1,51 @@
 #!/usr/bin/env python3
 
 import rospy
+import numpy as np
 from sensor_msgs.msg import JointState
 from geometry_msgs.msg import PoseStamped
 from std_msgs.msg import Float64
 from urdf_parser_py.urdf import URDF
+import tensorflow as tf
+
+def normalize_data_per_row(data, mean, stdev):
+    """
+    Normalize a give matrix of data (samples must be organized per row)
+    :param data: input data
+    :param mean: mean for normalization
+    :param stdev: standard deviation for normalization
+    :return: whitened data, (data - mean) / stdev
+    """
+
+    # sanity checks!
+    assert len(data.shape) == 2, "Expected the input data to be a 2D matrix"
+    assert data.shape[1] == mean.shape[1], "Data - Mean size mismatch ({} vs {})".format(data.shape[1], mean.shape[1])
+    assert data.shape[1] == stdev.shape[1], "Data - StDev size mismatch ({} vs {})".format(data.shape[1], stdev.shape[1])
+
+    centered = data - np.tile(mean, (data.shape[0], 1))
+    normalized_data = np.divide(centered, np.tile(stdev, (data.shape[0],1)))
+
+    return normalized_data
+
+def load_param(input_file):
+
+    mean = np.zeros((5,1))
+    stdev = np.zeros((5,1))
+
+    with open(input_file, 'r') as fid:
+        for line in fid:
+            if line[0] == "#":
+                # skip comments
+                continue
+
+            line = line.rstrip().split(" ")
+            # print(line)
+            assert len(line) == 10, "Expected each line to have 8 elements."
+
+            mean = np.column_stack(([float(line[0])], [float(line[2])], [float(line[4])], [float(line[6])], [float(line[8])]))
+            stdev = np.column_stack(([float(line[1])], [float(line[3])], [float(line[5])], [float(line[7])], [float(line[9])]))
+
+    return mean, stdev
 
 
 class RunPolicyNode(object):
@@ -21,10 +62,12 @@ class RunPolicyNode(object):
         self.camera_link = rospy.get_param("~camera_link", "camera_color_optical_frame")
 
         self.model_file = rospy.get_param("~model")              # required path to model file
-        self.normp_file = rospy.get_param("~norm_params", "")    # optional path to normalization parameters (empty str means no norm params)
+        self.normp_file = rospy.get_param("~norm_params","")    # optional path to normalization parameters (empty str means no norm params)
+
+        self.mean, self.stdev = load_param(self.normp_file)
 
         # TODO - complete the line below to load up your model and create any necessary class instance variables
-        self.model = tf.keras.models.load_model('best_imitation_weights')
+        self.model = tf.keras.models.load_model(self.model_file)
 
         # joint values
         self.joint1 = None
@@ -42,6 +85,7 @@ class RunPolicyNode(object):
         rospy.Subscriber('/target', PoseStamped, self.target_callback, queue_size=5)
 
         rospy.spin()
+
 
     def joints_callback(self, msg):
         """
@@ -69,7 +113,12 @@ class RunPolicyNode(object):
 
         # TODO - remove None return statement and complete function with the logic that runs your model to compute new
         # joint positions 1 & 3 for the robot...
-        return None
+        input = np.array([[msg.pose.position.x, msg.pose.position.y, msg.pose.position.z, self.joint1, self.joint3]])
+        # print(self.stdev.shape)
+        norm_input = normalize_data_per_row(input, self.mean, self.stdev)
+        predicted = self.model.predict(norm_input)
+
+        return predicted
 
     def target_callback(self, msg):
         """
@@ -94,7 +143,9 @@ class RunPolicyNode(object):
             return
         else:
             # upack result
-            new_j1, new_j3 = joint_angles
+            # print(joint_angles)
+            new_j1 = joint_angles[0,0]
+            new_j3 = joint_angles[0,1]
 
         # publish command
         self.joint1_pub.publish(Float64(new_j1))
